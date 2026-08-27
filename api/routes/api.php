@@ -1,8 +1,9 @@
 <?php
 
+
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ItemController;
 
-Route::get('/greeting', function () {
-    return 'Hello World';
-});
+Route::get('/shopping-lists/{shoppingList}/items', [ItemController::class, 'index']);
