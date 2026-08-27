@@ -1,5 +1,3 @@
-Web readme · MD
-
 # shopping-list-web
 
 React single-page app for the shopping list. Talks to the Laravel API in `../api` over JSON.
