@@ -1,9 +1,11 @@
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 import { PageShell } from "@/components/layout/PageShell";
 import { ShoppingListView } from "@/features/shoppingList/components/ShoppingListView";
+import type { Item } from "@/features/shoppingList/types";
+import { itemsPage } from "../../fixtures/items";
 import { renderWithProviders } from "../../renderWithProviders";
 
 const server = setupServer();
@@ -14,6 +16,30 @@ afterAll(() => server.close());
 
 const itemsUrl = "*/api/shopping-lists/1/items";
 
+const bread: Item = {
+  id: 1,
+  name: "Wholemeal bread",
+  price_pence: 140,
+  is_purchased: false,
+  position: 0,
+};
+
+const chicken: Item = {
+  id: 2,
+  name: "Chicken thighs",
+  price_pence: 550,
+  is_purchased: false,
+  position: 1,
+};
+
+const bananas: Item = {
+  id: 3,
+  name: "Bananas",
+  price_pence: 89,
+  is_purchased: false,
+  position: 2,
+};
+
 function renderView() {
   return renderWithProviders(
     <PageShell>
@@ -22,37 +48,16 @@ function renderView() {
   );
 }
 
-function itemsPage(
-  items: Array<{ id: number; name: string; price_pence: number }>,
-  meta: Partial<Record<string, number>> = {},
-) {
-  return HttpResponse.json({
-    data: items,
-    meta: {
-      current_page: 1,
-      last_page: 1,
-      per_page: 25,
-      total: items.length,
-      ...meta,
-    },
-  });
-}
-
 it("shows the items on the list", async () => {
-  server.use(
-    http.get(itemsUrl, () =>
-      itemsPage([
-        { id: 1, name: "Wholemeal bread", price_pence: 140 },
-        { id: 2, name: "Chicken thighs", price_pence: 550 },
-      ]),
-    ),
-  );
+  server.use(http.get(itemsUrl, () => itemsPage([bread, chicken])));
 
   renderView();
 
   expect(await screen.findByText("Wholemeal bread")).toBeInTheDocument();
   expect(screen.getByText("£1.40")).toBeInTheDocument();
-  expect(screen.getByText(/to find · 2/i)).toBeInTheDocument();
+  expect(screen.getByText("Chicken thighs")).toBeInTheDocument();
+  expect(screen.getByText("£5.50")).toBeInTheDocument();
+  expect(screen.getByText(/still to find · 2/i)).toBeInTheDocument();
 });
 
 it("shows an empty state when there are no items", async () => {
@@ -66,15 +71,12 @@ it("shows an empty state when there are no items", async () => {
 });
 
 it("hides the pager when there is only one page", async () => {
-  server.use(
-    http.get(itemsUrl, () =>
-      itemsPage([{ id: 1, name: "Bananas", price_pence: 89 }]),
-    ),
-  );
+  server.use(http.get(itemsUrl, () => itemsPage([bananas])));
 
   renderView();
 
   await screen.findByText("Bananas");
+
   expect(
     screen.queryByRole("button", { name: /next/i }),
   ).not.toBeInTheDocument();
@@ -87,12 +89,11 @@ it("loads the next page when Next is clicked", async () => {
     http.get(itemsUrl, ({ request }) => {
       const page = Number(new URL(request.url).searchParams.get("page") ?? 1);
 
-      return itemsPage(
-        page === 1
-          ? [{ id: 1, name: "Wholemeal bread", price_pence: 140 }]
-          : [{ id: 2, name: "Porridge oats", price_pence: 185 }],
-        { current_page: page, last_page: 2, total: 2 },
-      );
+      return itemsPage(page === 1 ? [bread] : [chicken], {
+        current_page: page,
+        last_page: 2,
+        total: 2,
+      });
     }),
   );
 
@@ -102,8 +103,11 @@ it("loads the next page when Next is clicked", async () => {
 
   await user.click(screen.getByRole("button", { name: /next/i }));
 
-  expect(await screen.findByText("Porridge oats")).toBeInTheDocument();
-  expect(screen.queryByText("Wholemeal bread")).not.toBeInTheDocument();
+  expect(await screen.findByText("Chicken thighs")).toBeInTheDocument();
+
+  await waitFor(() => {
+    expect(screen.queryByText("Wholemeal bread")).not.toBeInTheDocument();
+  });
 });
 
 it("shows an error when the request fails", async () => {
@@ -111,5 +115,7 @@ it("shows an error when the request fails", async () => {
 
   renderView();
 
-  expect(await screen.findByRole("alert")).toBeInTheDocument();
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    /could not load your list/i,
+  );
 });

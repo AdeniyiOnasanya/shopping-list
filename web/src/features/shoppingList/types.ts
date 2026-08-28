@@ -2,7 +2,15 @@ export type Item = {
   id: number;
   name: string;
   price_pence: number;
+  is_purchased: boolean;
 };
+
+export type NewItem = {
+  name: string;
+  price_pence: number;
+};
+
+export type ValidationErrors = Record<string, string[]>;
 
 export type Paginated<T> = {
   data: T[];
@@ -14,9 +22,9 @@ export type Paginated<T> = {
   };
 };
 
-export type NewItem = {
-  name: string;
-  price_pence: number;
+export type ItemsPage = Paginated<Item> & {
+  counts: {
+    to_find: number;
+    in_trolley: number;
+  };
 };
-
-export type ValidationErrors = Record<string, string[]>;

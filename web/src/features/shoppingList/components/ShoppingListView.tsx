@@ -3,6 +3,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { formatPence } from "@/lib/money";
 import { useItems } from "../hooks/useItems";
 import { useRemoveItem } from "../hooks/useRemoveItem";
+import { useToggleItem } from "../hooks/useToggleItem";
 import { AddItemDialog } from "./AddItemDialog";
 import { EmptyState } from "./EmptyState";
 import { ErrorState } from "./ErrorState";
@@ -20,12 +21,15 @@ export function ShoppingListView({ listId }: { listId: number }) {
     lastPage,
     total,
     perPage,
+    toFind,
+    inTrolley,
     isLoading,
     isError,
     goToPage,
   } = useItems(listId);
 
-  const { removeItem, isRemoving } = useRemoveItem(listId, page);
+  const { removeItem } = useRemoveItem(listId, page);
+  const { toggleItem } = useToggleItem(listId, page);
 
   const [isAdding, setIsAdding] = useState(false);
   const [pendingRemoval, setPendingRemoval] = useState<Item | null>(null);
@@ -53,9 +57,11 @@ export function ShoppingListView({ listId }: { listId: number }) {
       <div className="flex-1 overflow-y-auto overscroll-contain">
         <ListBody
           items={items}
-          total={total}
+          toFind={toFind}
+          inTrolley={inTrolley}
           isLoading={isLoading}
           isError={isError}
+          onToggle={toggleItem}
           onRemove={setPendingRemoval}
         />
       </div>
@@ -84,7 +90,6 @@ export function ShoppingListView({ listId }: { listId: number }) {
             : ""
         }
         confirmLabel="Remove"
-        isWorking={isRemoving}
         onConfirm={confirmRemoval}
         onCancel={() => setPendingRemoval(null)}
       />
@@ -92,30 +97,82 @@ export function ShoppingListView({ listId }: { listId: number }) {
   );
 }
 
-function ListBody({
-  items,
-  total,
-  isLoading,
-  isError,
-  onRemove,
-}: {
+type BodyProps = {
   items: Item[];
-  total: number;
+  toFind: number;
+  inTrolley: number;
   isLoading: boolean;
   isError: boolean;
+  onToggle: (item: Item) => void;
   onRemove: (item: Item) => void;
-}) {
+};
+
+function ListBody({
+  items,
+  toFind,
+  inTrolley,
+  isLoading,
+  isError,
+  onToggle,
+  onRemove,
+}: BodyProps) {
   if (isLoading) return <ItemsSkeleton />;
   if (isError) return <ErrorState />;
   if (items.length === 0) return <EmptyState />;
 
+  const stillToFind = items.filter((item) => !item.is_purchased);
+  const inTheTrolley = items.filter((item) => item.is_purchased);
+
   return (
     <>
-      <SectionLabel count={total} />
+      {stillToFind.length > 0 && (
+        <Section
+          label="Still to find"
+          count={toFind}
+          items={stillToFind}
+          onToggle={onToggle}
+          onRemove={onRemove}
+        />
+      )}
+
+      {inTheTrolley.length > 0 && (
+        <Section
+          label="In the trolley"
+          count={inTrolley}
+          items={inTheTrolley}
+          onToggle={onToggle}
+          onRemove={onRemove}
+        />
+      )}
+    </>
+  );
+}
+
+function Section({
+  label,
+  count,
+  items,
+  onToggle,
+  onRemove,
+}: {
+  label: string;
+  count: number;
+  items: Item[];
+  onToggle: (item: Item) => void;
+  onRemove: (item: Item) => void;
+}) {
+  return (
+    <>
+      <SectionLabel label={label} count={count} />
 
       <ul>
         {items.map((item) => (
-          <ItemRow key={item.id} item={item} onRemove={onRemove} />
+          <ItemRow
+            key={item.id}
+            item={item}
+            onToggle={onToggle}
+            onRemove={onRemove}
+          />
         ))}
       </ul>
     </>
