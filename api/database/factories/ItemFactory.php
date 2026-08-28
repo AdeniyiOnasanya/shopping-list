@@ -24,6 +24,12 @@ class ItemFactory extends Factory
                 'Milk', 'Bread', 'Eggs', 'Banana', 'Rice', 'Grapes'
             ]),
             'price_pence' => fake()->numberBetween(50,900),
+            'is_purchased' => false,
         ];
+    }
+
+    public function purchased(): static
+    {
+        return $this->state(fn () => ['is_purchased' => true]);
     }
 }

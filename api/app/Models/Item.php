@@ -13,7 +13,14 @@ class Item extends Model
     protected $fillable = [
         'name',
         'price_pence',
+        'is_purchased',
     ];
+
+    protected function casts(): array
+    {
+        return ['is_purchased' => 'boolean'];
+    }
+
 
      public function ShoppingList(): BelongsTo
      {
