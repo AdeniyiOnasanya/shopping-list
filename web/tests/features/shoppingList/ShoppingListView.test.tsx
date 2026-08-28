@@ -1,10 +1,10 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 import { PageShell } from "@/components/layout/PageShell";
 import { ShoppingListView } from "@/features/shoppingList/components/ShoppingListView";
+import { renderWithProviders } from "../../renderWithProviders";
 
 const server = setupServer();
 
@@ -15,16 +15,10 @@ afterAll(() => server.close());
 const itemsUrl = "*/api/shopping-lists/1/items";
 
 function renderView() {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <PageShell>
-        <ShoppingListView listId={1} />
-      </PageShell>
-    </QueryClientProvider>,
+  return renderWithProviders(
+    <PageShell>
+      <ShoppingListView listId={1} />
+    </PageShell>,
   );
 }
 

@@ -1,5 +1,8 @@
 import { useState } from "react";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { formatPence } from "@/lib/money";
 import { useItems } from "../hooks/useItems";
+import { useRemoveItem } from "../hooks/useRemoveItem";
 import { AddItemDialog } from "./AddItemDialog";
 import { EmptyState } from "./EmptyState";
 import { ErrorState } from "./ErrorState";
@@ -22,12 +25,27 @@ export function ShoppingListView({ listId }: { listId: number }) {
     goToPage,
   } = useItems(listId);
 
-  const [isAdding, setIsAdding] = useState(false);
+  const { removeItem, isRemoving } = useRemoveItem(listId, page);
 
-  // The new item goes to the end of the list, which may be a page that
-  // does not exist yet, so work out where it will land.
+  const [isAdding, setIsAdding] = useState(false);
+  const [pendingRemoval, setPendingRemoval] = useState<Item | null>(null);
+
+  // A new item goes to the end, which may be a page that does not exist yet.
   function showNewestItem() {
     goToPage(Math.ceil((total + 1) / perPage));
+  }
+
+  function confirmRemoval() {
+    if (!pendingRemoval) return;
+
+    // Removing the only row on a page would leave us on a page that no
+    // longer exists, so step back before the list refetches.
+    if (items.length === 1 && page > 1) {
+      goToPage(page - 1);
+    }
+
+    removeItem(pendingRemoval);
+    setPendingRemoval(null);
   }
 
   return (
@@ -38,6 +56,7 @@ export function ShoppingListView({ listId }: { listId: number }) {
           total={total}
           isLoading={isLoading}
           isError={isError}
+          onRemove={setPendingRemoval}
         />
       </div>
 
@@ -55,6 +74,20 @@ export function ShoppingListView({ listId }: { listId: number }) {
         onClose={() => setIsAdding(false)}
         onAdded={showNewestItem}
       />
+
+      <ConfirmDialog
+        open={pendingRemoval !== null}
+        title={pendingRemoval ? `Remove “${pendingRemoval.name}”?` : ""}
+        body={
+          pendingRemoval
+            ? `It'll come off your list. ${formatPence(pendingRemoval.price_pence)} comes off the total.`
+            : ""
+        }
+        confirmLabel="Remove"
+        isWorking={isRemoving}
+        onConfirm={confirmRemoval}
+        onCancel={() => setPendingRemoval(null)}
+      />
     </>
   );
 }
@@ -64,11 +97,13 @@ function ListBody({
   total,
   isLoading,
   isError,
+  onRemove,
 }: {
   items: Item[];
   total: number;
   isLoading: boolean;
   isError: boolean;
+  onRemove: (item: Item) => void;
 }) {
   if (isLoading) return <ItemsSkeleton />;
   if (isError) return <ErrorState />;
@@ -80,7 +115,7 @@ function ListBody({
 
       <ul>
         {items.map((item) => (
-          <ItemRow key={item.id} item={item} />
+          <ItemRow key={item.id} item={item} onRemove={onRemove} />
         ))}
       </ul>
     </>

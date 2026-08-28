@@ -24,3 +24,10 @@ export async function createItem(
 
   return data.data;
 }
+
+export async function deleteItem(
+  listId: number,
+  itemId: number,
+): Promise<void> {
+  await apiClient.delete(`/shopping-lists/${listId}/items/${itemId}`);
+}

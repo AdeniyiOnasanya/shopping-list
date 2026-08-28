@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes } from "react";
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "danger";
 };
 
 const base =
@@ -12,6 +12,7 @@ const base =
 const variants = {
   primary: "h-14 border-2 border-brand bg-brand font-bold text-ink",
   secondary: "h-12 border-2 border-ink bg-white font-semibold text-ink",
+  danger: "h-12 border-2 border-danger bg-danger font-bold text-white",
 };
 
 export function Button({

@@ -55,6 +55,19 @@
   --color-placeholder: #6b7c83;
   --color-field-edge: #94a5ac;
   --color-scrim: #05161e73;
+
+  --animate-toast-in: toast-in 180ms ease-out;
+
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
 }
 
 @layer base {
