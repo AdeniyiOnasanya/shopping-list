@@ -52,9 +52,8 @@ cd web && npm test
 | 3   | Remove items           | Confirmation dialog, optimistic with rollback        |
 | 4   | Cross items off        | Two sections, whole-list counts                      |
 | 5   | Persist between visits | Server-side in MySQL                                 |
-| 6   | Reorder                | Up and down arrows                                   |
 
-Stories 7 to 10 (total, budget, email, accounts) are not built. See "What I'd do next".
+Stories 6 to 10 (re-order, total, budget, email, accounts) are not built. See "What I'd do next".
 
 ## Decisions worth knowing
 
@@ -67,8 +66,6 @@ Stories 7 to 10 (total, budget, email, accounts) are not built. See "What I'd do
 **Items sort unpurchased first, then by position.** That is what keeps the two sections coherent across pages: without it, page 1 could be entirely ticked and page 2 entirely unticked, and the headings would misrepresent the rest of the list.
 
 **Section counts are whole-list figures, not page figures.** Two extra `COUNT` queries per request, which is the honest price of "still to find · 4" being true on every page.
-
-**A service layer exists only where there is a rule to hold.** `ItemService` arrived at story 6, because assigning the next position and swapping neighbours is real work. Toggling a boolean still writes straight from the controller, because wrapping it would be ceremony. Knowing when not to add a layer matters as much as knowing how.
 
 **Optimistic updates are used selectively.** Removing and ticking are optimistic with rollback, because they happen often and need to feel instant while you're walking round a shop. Adding and reordering are not: a created row needs a server-assigned id, and a reordered item's neighbour may be on a page the client hasn't loaded. Optimism hides latency where latency hurts; it isn't a default.
 

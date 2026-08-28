@@ -39,13 +39,12 @@ alias sail='[ -f sail ] && sh sail || sh vendor/bin/sail'
 
 All nested under a list, all scoped so an item id belonging to another list returns 404.
 
-| Method   | Path                                           | Purpose                                 |
-| -------- | ---------------------------------------------- | --------------------------------------- |
-| `GET`    | `/api/shopping-lists/{list}/items`             | A page of items, plus whole-list counts |
-| `POST`   | `/api/shopping-lists/{list}/items`             | Add an item                             |
-| `PATCH`  | `/api/shopping-lists/{list}/items/{item}`      | Mark picked up or not                   |
-| `PATCH`  | `/api/shopping-lists/{list}/items/{item}/move` | Move one place up or down               |
-| `DELETE` | `/api/shopping-lists/{list}/items/{item}`      | Remove an item                          |
+| Method   | Path                                      | Purpose                                 |
+| -------- | ----------------------------------------- | --------------------------------------- |
+| `GET`    | `/api/shopping-lists/{list}/items`        | A page of items, plus whole-list counts |
+| `POST`   | `/api/shopping-lists/{list}/items`        | Add an item                             |
+| `PATCH`  | `/api/shopping-lists/{list}/items/{item}` | Mark picked up or not                   |
+| `DELETE` | `/api/shopping-lists/{list}/items/{item}` | Remove an item                          |
 
 `GET` accepts `page` and `per_page`. `per_page` is validated with a maximum of 100, because an unbounded page size is a free denial of service against your own database. The default of 25 lives on the server, since the server owns the pagination contract.
 
@@ -97,8 +96,6 @@ The rule that keeps it honest: if a controller has an `if` in it that isn't abou
 
 **Routes are grouped with `->scopeBindings()`.** Laravel otherwise resolves `{item}` against the whole table, so an item belonging to another list could be deleted by guessing its id. `RemoveItemTest` has the regression test.
 
-**Reordering swaps positions with the nearest neighbour in the same section**, inside a transaction with `lockForUpdate`. Two updates rather than renumbering N rows, and concurrent moves cannot interleave into a wrong order. Reaching the end is a no-op rather than a 422, because the arrow is disabled in the UI and the person has done nothing wrong.
-
 **`authorize()` returns `true` on every form request.** There are no users yet. At story 10 these become real policy checks.
 
 ## Tests
@@ -116,7 +113,6 @@ The tests worth reading first, because they guard decisions rather than features
 - `RemoveItemTest` → "will not remove an item belonging to another list"
 - `AddItemTest` → "treats a differently cased or padded name as the same item"
 - `ToggleItemTest` → "counts the whole list, not the current page"
-- `ReorderItemTest` → "does not swap across the trolley boundary"
 - `PersistenceTest` → story 5, which has no endpoint of its own
 
 ## Formatting
