@@ -50,6 +50,11 @@
   --color-dark-line: #3b4e56;
 
   --tracking-label: 0.06em;
+
+  --color-invalid: #a4231c;
+  --color-placeholder: #6b7c83;
+  --color-field-edge: #94a5ac;
+  --color-scrim: #05161e73;
 }
 
 @layer base {

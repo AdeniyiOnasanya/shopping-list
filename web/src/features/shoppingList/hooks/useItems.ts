@@ -16,6 +16,7 @@ export function useItems(listId: number) {
     page,
     lastPage: data?.meta.last_page ?? 1,
     total: data?.meta.total ?? 0,
+    perPage: data?.meta.per_page ?? 25,
     isLoading: isPending,
     isError,
     goToPage: setPage,

@@ -13,3 +13,10 @@ export type Paginated<T> = {
     total: number;
   };
 };
+
+export type NewItem = {
+  name: string;
+  price_pence: number;
+};
+
+export type ValidationErrors = Record<string, string[]>;
