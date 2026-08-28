@@ -7,3 +7,4 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ItemController;
 
 Route::get('/shopping-lists/{shoppingList}/items', [ItemController::class, 'index']);
+Route::post('/shopping-lists/{shoppingList}/items', [ItemController::class, 'store']);
