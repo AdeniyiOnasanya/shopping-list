@@ -6,6 +6,7 @@ use App\Http\Requests\ItemIndexRequest;
 use App\Http\Requests\StoreItemRequest;
 use App\Http\Resources\ItemResource;
 use App\Models\ShoppingList;
+use App\Models\Item;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,4 +28,12 @@ class ItemController extends Controller
             ->response()
             ->setStatusCode(Response::HTTP_CREATED);
     }
+
+    public function destroy(ShoppingList $shoppingList, Item $item): Response
+    {
+        $item->delete();
+
+        return response()->noContent();
+    }
+
 }
