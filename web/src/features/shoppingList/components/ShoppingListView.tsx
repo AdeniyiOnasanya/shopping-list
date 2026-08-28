@@ -32,15 +32,19 @@ export function ShoppingListView({ listId }: { listId: number }) {
 
   return (
     <>
-      <ListBody
-        items={items}
-        total={total}
-        isLoading={isLoading}
-        isError={isError}
-      />
+      <div className="flex-1 overflow-y-auto overscroll-contain">
+        <ListBody
+          items={items}
+          total={total}
+          isLoading={isLoading}
+          isError={isError}
+        />
+      </div>
 
       {!isLoading && !isError && (
-        <Pagination page={page} lastPage={lastPage} onChange={goToPage} />
+        <div className="shrink-0">
+          <Pagination page={page} lastPage={lastPage} onChange={goToPage} />
+        </div>
       )}
 
       <ListFooter onAdd={() => setIsAdding(true)} />
