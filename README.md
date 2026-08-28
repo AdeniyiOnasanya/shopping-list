@@ -89,7 +89,3 @@ Stories 7 to 10 (total, budget, email, accounts) are not built. See "What I'd do
 ## Time
 
 Roughly six hours. The trade throughout was to finish fewer stories properly, with tests and accessible markup, rather than to sketch all ten.
-
-## On AI
-
-I used Claude while building this, mostly for reviewing my own approach and for talking through the trade-offs above. Every decision in this README is one I made and can defend, and I wrote or reviewed every line in the repository.
