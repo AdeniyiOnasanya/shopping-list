@@ -75,7 +75,7 @@ Types in `features/*/types.ts` are written by hand rather than generated, so the
 
 ## Decisions
 
-**Optimistic updates are used selectively.** Removing and ticking are optimistic with rollback on failure, because they happen constantly while you're walking round a shop and have to feel instant. Adding is not, because a created row needs a server-assigned id. Reordering is not, because the item it swaps with may be on a page the client hasn't loaded, and guessing wrong looks like a bug rather than a delay.
+**Optimistic updates are used selectively.** Removing and ticking are optimistic with rollback on failure, because they happen constantly while you're walking round a shop and have to feel instant. Adding is not, because a created row needs a server-assigned id.
 
 **Feedback matches how visible the action already is.** Removing a row makes it disappear, so it gets a success toast. Ticking a box visibly changes the row, so it doesn't — eight ticks would mean eight toasts. Failures always toast, because a silent rollback is baffling.
 
@@ -84,8 +84,6 @@ Types in `features/*/types.ts` are written by hand rather than generated, so the
 **Dialogs use the native `<dialog>` element.** `showModal()` gives focus trapping, Escape to close, an inert background and a real `::backdrop`, with no dependency. Building any of that by hand is where accessible modals usually go wrong.
 
 **Checkboxes are real `<input type="checkbox">`, hidden with `sr-only` rather than `hidden`.** `display: none` removes an element from the accessibility tree and makes it unfocusable. `sr-only` clips it while leaving it focusable and announced, so keyboard operation and screen reader output come free and the tests can use `getByRole('checkbox')`.
-
-**Reordering uses arrows, not drag and drop.** The design offers both. Arrows work with a keyboard and a screen reader with no extra code and can be tested in jsdom. Drag would be an addition, not a replacement.
 
 ## Styling
 
