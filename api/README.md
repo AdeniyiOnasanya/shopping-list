@@ -1,58 +1,126 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# shopping-list-api
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Laravel 13 JSON API for the shopping list. Consumed by the React app in `../web`.
 
-## About Laravel
+## Requirements
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Docker Desktop. Everything else runs in containers through Laravel Sail.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Running it
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+cp .env.example .env
+composer install
+php artisan key:generate
+./vendor/bin/sail up -d
+./vendor/bin/sail artisan migrate --seed
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+The API is at `http://localhost/api`. First boot pulls images, so give it a few minutes.
 
-## Contributing
+Add the alias so you're not typing the full path all day:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+alias sail='[ -f sail ] && sh sail || sh vendor/bin/sail'
+```
 
-## Code of Conduct
+**Use `sail` for everything once the containers are up.** `DB_HOST=mysql` only resolves inside the Docker network, so `php artisan migrate` on the host fails with a connection error while `sail artisan migrate` works. The two exceptions are `composer install` and `key:generate`, which run before any container exists.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Environment
 
-## Security Vulnerabilities
+| Variable          | Value                   | Why                                                                                  |
+| ----------------- | ----------------------- | ------------------------------------------------------------------------------------ |
+| `DB_HOST`         | `mysql`                 | The compose service name. `127.0.0.1` points at the PHP container, not the database. |
+| `APP_PORT`        | `80`                    | Change if something already owns port 80.                                            |
+| `FORWARD_DB_PORT` | `3307`                  | Only needed if you already run MySQL on 3306.                                        |
+| `FRONTEND_URL`    | `http://localhost:5173` | Where the SPA runs.                                                                  |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Endpoints
 
-## License
+All nested under a list, all scoped so an item id belonging to another list returns 404.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+| Method   | Path                                           | Purpose                                 |
+| -------- | ---------------------------------------------- | --------------------------------------- |
+| `GET`    | `/api/shopping-lists/{list}/items`             | A page of items, plus whole-list counts |
+| `POST`   | `/api/shopping-lists/{list}/items`             | Add an item                             |
+| `PATCH`  | `/api/shopping-lists/{list}/items/{item}`      | Mark picked up or not                   |
+| `PATCH`  | `/api/shopping-lists/{list}/items/{item}/move` | Move one place up or down               |
+| `DELETE` | `/api/shopping-lists/{list}/items/{item}`      | Remove an item                          |
+
+`GET` accepts `page` and `per_page`. `per_page` is validated with a maximum of 100, because an unbounded page size is a free denial of service against your own database. The default of 25 lives on the server, since the server owns the pagination contract.
+
+The index response wraps items in Laravel's paginated envelope and adds a sibling `counts` key:
+
+```json
+{
+    "data": [
+        {
+            "id": 1,
+            "name": "Milk",
+            "price_pence": 130,
+            "is_purchased": false,
+            "position": 0
+        }
+    ],
+    "links": { "first": "…", "last": "…", "prev": null, "next": null },
+    "meta": { "current_page": 1, "last_page": 1, "per_page": 25, "total": 1 },
+    "counts": { "to_find": 1, "in_trolley": 0 }
+}
+```
+
+## Structure
+
+```
+app/
+  Http/
+    Controllers/ItemController.php
+    Requests/          validation, one per action
+    Resources/         the JSON contract
+  Models/
+  Rules/               UniqueItemNameInList
+  Services/            ItemService
+```
+
+A request flows: **route** picks the controller and applies middleware, **form request** authorises and validates and never reaches the controller if validation fails, **controller** takes validated data and returns a response, **service** holds business rules, **model** is data access, **resource** shapes the JSON.
+
+The rule that keeps it honest: if a controller has an `if` in it that isn't about HTTP, it belongs in the service.
+
+`ItemService` only exists because story 6 gave it something to do. Toggling `is_purchased` still writes straight from the controller, because a service that forwards one call is decoration.
+
+## Decisions
+
+**Money is `unsignedInteger` pence, never a float or a decimal.** Exact in the database, exact in JSON, exact in JavaScript.
+
+**`is_purchased` has a `boolean` cast on the model.** MySQL stores it as `tinyint(1)`, so without the cast the API sends `1` and `0` while the TypeScript type claims `boolean`. There is a test for exactly this.
+
+**Duplicate names are caught by `App\Rules\UniqueItemNameInList`, not `Rule::unique`.** The built-in rule's case sensitivity comes from the collation, which differs between MySQL and the SQLite used in tests. `LOWER(name)` behaves the same on both. It costs an index scan, which is irrelevant on a shopping list and would not be on a large table.
+
+**Routes are grouped with `->scopeBindings()`.** Laravel otherwise resolves `{item}` against the whole table, so an item belonging to another list could be deleted by guessing its id. `RemoveItemTest` has the regression test.
+
+**Reordering swaps positions with the nearest neighbour in the same section**, inside a transaction with `lockForUpdate`. Two updates rather than renumbering N rows, and concurrent moves cannot interleave into a wrong order. Reaching the end is a no-op rather than a 422, because the arrow is disabled in the UI and the person has done nothing wrong.
+
+**`authorize()` returns `true` on every form request.** There are no users yet. At story 10 these become real policy checks.
+
+## Tests
+
+```bash
+sail pest
+```
+
+Feature tests hit the real routes through the container and the database, so one test exercises the route, form request, binding, controller, service and resource together. There is one unit-level concern worth naming: `ItemService` is injected through the container, so it can be swapped in a test if that becomes useful.
+
+Tests run against SQLite in memory for speed. CI would run MySQL, which matters for the collation and boolean cast behaviour described above.
+
+The tests worth reading first, because they guard decisions rather than features:
+
+- `RemoveItemTest` → "will not remove an item belonging to another list"
+- `AddItemTest` → "treats a differently cased or padded name as the same item"
+- `ToggleItemTest` → "counts the whole list, not the current page"
+- `ReorderItemTest` → "does not swap across the trolley boundary"
+- `PersistenceTest` → story 5, which has no endpoint of its own
+
+## Formatting
+
+```bash
+sail pint
+```
