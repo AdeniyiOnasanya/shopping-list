@@ -1,1 +1,65 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+
+  /* Type scale from the design, so text-base is the row size.
+     Overriding the namespace means no arbitrary sizes anywhere. */
+  --text-xs: 13px;
+  --text-xs--line-height: 1.3;
+  --text-sm: 15px;
+  --text-sm--line-height: 1.5;
+  --text-base: 17px;
+  --text-base--line-height: 1.45;
+  --text-lg: 20px;
+  --text-lg--line-height: 1.3;
+  --text-xl: 24px;
+  --text-xl--line-height: 1.25;
+  --text-2xl: 32px;
+  --text-2xl--line-height: 1.15;
+
+  /* Text. #05161E carries every piece of body copy. */
+  --color-ink: #05161e;
+  --color-muted: #40545d;
+  --color-subtle: #5a6c74;
+  --color-faint: #7a8b92;
+
+  /* Brand green. Fills only, never text on white, never under white text. */
+  --color-brand: #53a00a;
+  --color-brand-press: #4a8f09;
+  --color-brand-text: #3e7a08;
+  --color-brand-tint: #eaf5dc;
+  --color-brand-tint-edge: #c9e8a4;
+
+  /* Over budget. */
+  --color-danger: #8e1c16;
+  --color-danger-tint: #fdf2f1;
+  --color-danger-edge: #f0c9c6;
+
+  /* Surfaces and lines on white. */
+  --color-page: #f2f5f6;
+  --color-surface: #f6f9fa;
+  --color-line: #e6ebed;
+  --color-edge: #d3dcdf;
+  --color-disabled: #e4eaec;
+  --color-disabled-text: #6b7c83;
+
+  /* On the dark header. */
+  --color-on-dark: #e7eef0;
+  --color-on-dark-muted: #a9bcc3;
+  --color-dark-line: #3b4e56;
+
+  --tracking-label: 0.06em;
+}
+
+@layer base {
+  body {
+    background: var(--color-page);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+}
