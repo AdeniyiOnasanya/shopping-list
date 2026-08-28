@@ -74,18 +74,6 @@ Stories 7 to 10 (total, budget, email, accounts) are not built. See "What I'd do
 
 **Tests run on SQLite in memory for speed.** CI would run MySQL. One test in `ToggleItemTest` asserts `is_purchased` comes back as `true` rather than `1`, which is the difference the model cast makes and the kind of thing that only shows up on MySQL.
 
-## What I'd do next
-
-**Stories 7 and 8, the total and the budget.** Nearest to done: `budget_pence` is already on the `shopping_lists` table and every price is already an integer. The total should be computed server-side and returned alongside the paginated items, since summing a page would give the wrong answer.
-
-**Story 9, sharing by email.** Sail already runs Mailpit, so the mail side is one config change and a mailable.
-
-**Story 10, accounts.** `user_id` on `shopping_lists`, Sanctum in SPA cookie mode, and the `authorize()` methods on the form requests become real policy checks instead of returning `true`.
-
-**Drag and drop for reordering.** The arrows work and are keyboard accessible; drag would be an addition rather than a replacement.
-
-**Offline support.** The design has an offline screen and the story is set in a supermarket, where signal is often poor. Doing it properly needs a service worker and a sync queue.
-
 ## Time
 
 Roughly six hours. The trade throughout was to finish fewer stories properly, with tests and accessible markup, rather than to sketch all ten.
