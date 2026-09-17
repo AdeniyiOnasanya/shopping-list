@@ -3,8 +3,8 @@
 namespace Database\Factories;
 
 use App\Models\Item;
-use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\ShoppingList;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends Factory<Item>
@@ -21,9 +21,9 @@ class ItemFactory extends Factory
         return [
             'shopping_list_id' => ShoppingList::factory(),
             'name' => fake()->randomElement([
-                'Milk', 'Bread', 'Eggs', 'Banana', 'Rice', 'Grapes'
+                'Milk', 'Bread', 'Eggs', 'Banana', 'Rice', 'Grapes',
             ]),
-            'price_pence' => fake()->numberBetween(50,900),
+            'price_pence' => fake()->numberBetween(50, 900),
             'is_purchased' => false,
         ];
     }

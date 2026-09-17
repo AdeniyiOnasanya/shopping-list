@@ -2,17 +2,15 @@
 
 namespace App\Rules;
 
-use Closure;
 use App\Models\ShoppingList;
+use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Translation\PotentiallyTranslatedString;
 
 class UniqueItemNameInList implements ValidationRule
 {
+    public function __construct(private readonly ShoppingList $list) {}
 
-    public function __construct(private readonly ShoppingList $list)
-    {
-    }
     /**
      * Run the validation rule.
      *
@@ -20,7 +18,7 @@ class UniqueItemNameInList implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-         if (! is_string($value)) {
+        if (! is_string($value)) {
             return;
         }
 

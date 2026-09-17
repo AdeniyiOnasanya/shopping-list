@@ -6,7 +6,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-
 it('keeps items added during an earlier visit', function () {
     $list = ShoppingList::factory()->create();
 

@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 import { PageShell } from "@/components/layout/PageShell";
-import { ShoppingListView } from "@/features/shoppingList/components/ShoppingListView";
+import { ListView } from "@/features/shoppingList/components/List/ListView.tsx";
 import { renderWithProviders } from "../../renderWithProviders";
 
 const server = setupServer();
@@ -17,7 +17,7 @@ const itemsUrl = "*/api/shopping-lists/1/items";
 function renderView() {
   return renderWithProviders(
     <PageShell>
-      <ShoppingListView listId={1} />
+      <ListView listId={1} />
     </PageShell>,
   );
 }

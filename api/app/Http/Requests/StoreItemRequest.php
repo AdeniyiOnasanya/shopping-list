@@ -8,7 +8,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreItemRequest extends FormRequest
 {
-
     public const MAX_PRICE_PENCE = 1_000_000;
 
     public function authorize(): bool
@@ -37,7 +36,7 @@ class StoreItemRequest extends FormRequest
                 'max:255',
                 new UniqueItemNameInList($this->shoppingList()),
             ],
-            'price_pence' => ['integer', 'min:0', 'max:' . self::MAX_PRICE_PENCE],
+            'price_pence' => ['integer', 'min:0', 'max:'.self::MAX_PRICE_PENCE],
         ];
     }
 

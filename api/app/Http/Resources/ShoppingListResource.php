@@ -18,7 +18,7 @@ class ShoppingListResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'budget_pence' => $this->budget_pence,
-            'items' => ItemResource::collection($this->whenLoaded('items'))
+            'items' => ItemResource::collection($this->whenLoaded('items')),
         ];
     }
 }

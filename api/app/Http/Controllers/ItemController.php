@@ -15,25 +15,25 @@ use Symfony\Component\HttpFoundation\Response as Status;
 
 class ItemController extends Controller
 {
-public function index(
-    ItemIndexRequest $request,
-    ShoppingList $shoppingList,
-): AnonymousResourceCollection {
-    // Falls back to 15 per page if not passed in the request
-    $perPage = $request->integer('per_page', 15);
+    public function index(
+        ItemIndexRequest $request,
+        ShoppingList $shoppingList,
+    ): AnonymousResourceCollection {
+        // Falls back to 15 per page if not passed in the request
+        $perPage = $request->integer('per_page', 15);
 
-    $items = $shoppingList->items()
-        ->orderBy('is_purchased')
-        ->orderBy('id')
-        ->paginate($perPage);
+        $items = $shoppingList->items()
+            ->orderBy('is_purchased')
+            ->orderBy('id')
+            ->paginate($perPage);
 
-    return ItemResource::collection($items)->additional([
-        'counts' => [
-            'to_find' => $shoppingList->items()->where('is_purchased', false)->count(),
-            'in_trolley' => $shoppingList->items()->where('is_purchased', true)->count(),
-        ],
-    ]);
-}
+        return ItemResource::collection($items)->additional([
+            'counts' => [
+                'to_find' => $shoppingList->items()->where('is_purchased', false)->count(),
+                'in_trolley' => $shoppingList->items()->where('is_purchased', true)->count(),
+            ],
+        ]);
+    }
 
     public function store(
         StoreItemRequest $request,

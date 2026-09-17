@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "../../../components/ui/Button";
+import { Button } from "./Button.tsx";
 
 type Props = {
   page: number;

@@ -8,7 +8,9 @@ use Illuminate\Foundation\Http\FormRequest;
 class ItemIndexRequest extends FormRequest
 {
     public const DEFAULT_PER_PAGE = 25;
+
     public const MAX_PER_PAGE = 100;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -26,7 +28,7 @@ class ItemIndexRequest extends FormRequest
     {
         return [
             'page' => ['integer', 'min:1'],
-            'per_page' => ['integer', 'min:1', 'max:' . self::MAX_PER_PAGE],
+            'per_page' => ['integer', 'min:1', 'max:'.self::MAX_PER_PAGE],
         ];
     }
 

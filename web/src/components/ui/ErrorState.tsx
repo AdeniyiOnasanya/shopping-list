@@ -1,6 +1,10 @@
 import { TriangleAlert } from "lucide-react";
 
-export function ErrorState() {
+type ErrorStateProps = {
+  header:string
+  subHeader?:string
+}
+export function ErrorState({header, subHeader}:ErrorStateProps) {
   return (
     <div
       role="alert"
@@ -14,11 +18,15 @@ export function ErrorState() {
 
       <div>
         <p className="text-base font-semibold text-danger">
-          We could not load your list
+          {header}
         </p>
-        <p className="mt-1 text-sm text-muted">
-          Check your connection and try again.
-        </p>
+        {
+            subHeader && (
+                <p className="mt-1 text-sm text-mute">
+                  {subHeader}
+                </p>
+            )
+        }
       </div>
     </div>
   );

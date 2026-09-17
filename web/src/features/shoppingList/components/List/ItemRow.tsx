@@ -1,7 +1,7 @@
 import { Trash2 } from "lucide-react";
-import { Checkbox } from "@/components/ui/Checkbox";
-import { formatPence } from "@/lib/money";
-import type { Item } from "../types";
+import { Checkbox } from "@/components/ui/Checkbox.tsx";
+import { formatPence } from "@/lib/money.ts";
+import type { Item } from "../../types.ts";
 
 type Props = {
   item: Item;
